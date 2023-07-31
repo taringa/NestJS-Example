@@ -2,9 +2,11 @@ import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import {
   Controller, Get, HttpCode, HttpStatus,
 } from '@nestjs/common';
+import { AllowUnauthorizedRequest } from '@mia-platform-internal/taringa-auth-library';
 import AppService from './app.service';
 
 @Controller()
+@AllowUnauthorizedRequest() // <-- if you preffer to not use Taringa Auth library remove this line
 export default class AppController {
   constructor(private readonly appService: AppService) {}
 

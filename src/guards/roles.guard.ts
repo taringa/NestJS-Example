@@ -9,10 +9,7 @@ export default class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const roles = this.reflector.get<RolesEnum[]>(
-      'roles',
-      context.getHandler(),
-    );
+    const roles = this.reflector.get<RolesEnum[]>('roles', context.getHandler());
 
     if (_.isEmpty(roles)) {
       return true;

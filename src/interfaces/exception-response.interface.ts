@@ -1,4 +1,4 @@
-export interface ExceptionResponse {
+export interface HttpExceptionResponse {
   readonly statusCode: number;
 
   readonly error: string;
@@ -7,3 +7,5 @@ export interface ExceptionResponse {
 
   readonly messages: unknown[];
 }
+
+export interface ValidationExceptionResponse extends HttpExceptionResponse {}

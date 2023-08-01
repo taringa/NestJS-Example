@@ -1,47 +1,42 @@
 /* eslint-disable import/prefer-default-export */
 import {
   ArgumentsHost,
-  BadRequestException,
   Catch,
   ExceptionFilter,
+  HttpException,
   HttpStatus,
 } from '@nestjs/common';
 import { HttpArgumentsHost } from '@nestjs/common/interfaces';
 
-import { ValidationExceptionResponse } from '@interfaces/exception-response.interface';
+import { HttpExceptionResponse } from '@interfaces/exception-response.interface';
 import { HttpAdapterHost } from '@nestjs/core';
 
-@Catch(BadRequestException)
-export class ValidationExceptionsFilter implements ExceptionFilter {
+@Catch(HttpException)
+export class HttpExceptionFilter implements ExceptionFilter {
   constructor(private readonly httpAdapterHost: HttpAdapterHost) {}
 
-  catch(exception: any, host: ArgumentsHost) {
+  catch(exception: HttpException, host: ArgumentsHost) {
     const { httpAdapter } = this.httpAdapterHost;
     const ctx: HttpArgumentsHost = host.switchToHttp();
-
-    const exceptionResponse: ValidationExceptionResponse = exception.getResponse() as ValidationExceptionResponse;
-
-    const status = exceptionResponse.statusCode || HttpStatus.INTERNAL_SERVER_ERROR;
+    const status = exception.getStatus() || HttpStatus.INTERNAL_SERVER_ERROR;
+    const exceptionResponse: HttpExceptionResponse =
+      exception.getResponse() as HttpExceptionResponse;
 
     const responseBody = {
       statusCode: status,
       timestamp: new Date().toISOString(),
       path: httpAdapter.getRequestUrl(ctx.getRequest()),
-      type: 'ValidationException',
+      type: 'HttpException',
     };
 
     if (exceptionResponse.messages) {
       Reflect.set(responseBody, 'messages', exceptionResponse.messages);
     }
 
-    if (exceptionResponse.message) {
+    if (exceptionResponse.messages) {
       Reflect.set(responseBody, 'message', exceptionResponse.message);
     }
 
-    httpAdapter.reply(
-      ctx.getResponse(),
-      responseBody,
-      exceptionResponse.statusCode,
-    );
+    httpAdapter.reply(ctx.getResponse(), responseBody, status);
   }
 }
